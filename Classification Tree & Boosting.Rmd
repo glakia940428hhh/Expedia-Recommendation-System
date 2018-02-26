@@ -1,0 +1,117 @@
+
+
+```{r}
+expediaread <- read.csv("D:/Courses/Spring 2017/BUDT758T/project/dataset.csv")
+expedia <- data.frame(expediaread[2:4],expediaread[6],expediaread[8:9],expediaread[12:13],expediaread[15],expediaread[17:22])
+
+expedia$is_package <- as.factor(expedia$is_package)
+expedia$channel <- as.factor(expedia$channel)
+expedia$srch_adults_cnt <- as.factor(expedia$srch_adults_cnt)
+expedia$srch_children_cnt <- as.factor(expedia$srch_children_cnt)
+
+expedia$is_booking <- as.factor(expedia$is_booking)
+expedia$cnt <- as.factor(expedia$cnt)
+expedia$hotel_continent <- as.factor(expedia$hotel_continent)
+expedia$hotel_cluster <- as.factor(expedia$hotel_cluster)
+set.seed(12345)
+train <- sample(nrow(expedia),0.7*nrow(expedia))
+expediatrain <- expedia[train,]
+expediavalidation <- expedia[-train,]
+
+#plot(expedia$site_name,expedia$posa_continent)
+```
+
+```{r}
+## classifacation tree
+library(tree)
+library(ISLR)
+library(rpart)
+#library(rattle)
+library(rpart.plot)
+tree.expedia = rpart(hotel_cluster~.,data = expediatrain,control=rpart.control(minsplit = 500,cp=0))
+#summary(tree.expedia)
+#plot(tree.expedia)
+#text(tree.expedia,pretty=0)
+#prp(tree.expedia,varlen = 3)
+#tree.expedia
+
+```
+
+```{r}
+##computing test error for origin tree
+tree.pred1=predict(tree.expedia,expediavalidation,type="class")
+confusion1 <- table(tree.pred1,expediavalidation$hotel_cluster)
+confusion1
+accurate1 <- numeric()
+for (i in 0:20)
+{
+  accurate1[i] = confusion1[i,i]
+  accuracy1 = sum(accurate1)/sum(confusion1)
+}
+accuracy1
+```
+
+```{r}
+##k-fold cross-validation to prune back
+#set.seed(123)
+#cv.expedia=cv.tree(tree.expedia,FUN=prune.misclass,K=10)
+#cv.expedia
+#plot(cv.expedia$size,cv.expedia$dev,type="b")
+#best.size <- cv.expedia$size[which(cv.expedia$dev==min(cv.expedia$dev))]
+#best.size
+printcp(tree.expedia)
+bestcp <- tree.expedia$cptable[which.min(tree.expedia$cptable[,"xerror"]),"CP"]
+prune.expedia1=prune(tree.expedia,cp=bestcp)
+library(partykit)
+png("prunetree.png", res=80, height=1600, width=3000)
+plot(prune.expedia1)
+text(prune.expedia1,pretty=0)
+dev.off()
+
+#nodelabels(adj = 0)
+#text(prune.expedia1,pretty=0)
+#prp(prune.expedia1,varlen = 3)
+tree.pred2=predict(prune.expedia1,expediavalidation,type="class")
+confusion2 <- table(tree.pred1,expediavalidation$hotel_cluster)
+confusion2
+accurate2 <- numeric()
+for (i in 0:20)
+{
+  accurate2[i] = confusion2[i,i]
+  accuracy2 = sum(accurate2)/sum(confusion2)
+}
+accuracy2
+```
+
+
+```{r}
+##Boosting
+set.seed(12345)
+library(gbm)
+library(survival)
+library(lattice)
+library(splines)
+library(parallel)
+boost.expedia=gbm(expediatrain$hotel_cluster~.,expediatrain,distribution="multinomial",n.trees=100,interaction.depth=12)
+summary(boost.expedia)
+yhat.boost=predict(boost.expedia,n.trees=100,newdata = expediavalidation,type = 'response')
+boostpred <- rep(0,21600)
+for (i in 1:21600){
+  boostpred[i] <- which.max(yhat.boost[i,,])-1 
+}
+
+confusion5 = table(expediavalidation$hotel_cluster,boostpred)
+accurate5 <- numeric()
+for (i in 0:20)
+{
+  accurate5[i] = confusion5[i,i]
+  accuracy5 = sum(accurate5)/sum(confusion5)
+}
+accuracy5
+#importance(boost.expedia)
+#varImpPlot(boost.expedia)
+
+```
+
+
+

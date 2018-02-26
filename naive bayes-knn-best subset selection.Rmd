@@ -1,0 +1,199 @@
+---
+title: "Expedia"
+author: "Lu Gan"
+date: "5/3/2017"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+expedia <- read.csv("/Users/apple/Desktop/course/second term/data mining/dmproject/dataset.csv")
+expedia$srch_ci <- NULL
+expedia$srch_co <- NULL
+expedia$site_name<-NULL
+expedia$user_location_city<-NULL
+expedia$is_mobile<-NULL
+expedia$srch_rm_cnt<NULL
+expedia$srch_destination_type_id<-NULL
+str(expedia)
+set.seed(12345)
+train <- sample(nrow(expedia),0.7*nrow(expedia))
+expedia_train <- expedia[train,]
+expedia_validation <- expedia[-train,]
+expedia[,]<-lapply(expedia[,],factor)
+summary(expedia)
+#naive bayes
+library(e1071)
+model <- naiveBayes(hotel_cluster~., data=expedia_train)
+model
+prediction <- predict(model, newdata = expedia_validation[,1:14],type="raw")
+
+prediction <- data.frame(prediction)
+predictionclass <- rep(0,nrow(expedia_validation))
+which.max(prediction[1,])
+for(i in 1:nrow(expedia_validation))
+{
+  predictionclass[i]=which.max(prediction[i,])-1
+}
+table1<-table(expedia_validation$hotel_cluster,predictionclass,dnn=list('actual','predicted'))
+table1
+sum<-0
+for (i in 1:21)
+{
+  sum<-sum+table1[i,i]
+}
+accuracy<-sum/sum(table1)
+accuracy
+
+
+
+
+#knn
+library("caret")
+library(class)
+set.seed(12345)
+expedia <- read.csv("/Users/apple/Desktop/course/second term/data mining/dmproject/dataset.csv")
+expedia$srch_ci <- NULL
+expedia$srch_co <- NULL
+expedia$site_name<-NULL
+expedia$user_location_city<-NULL
+expedia$is_mobile<-NULL
+expedia$srch_rm_cnt<-NULL
+expedia$srch_destination_type_id<-NULL
+
+fun <- function(x){ 
+  a <- mean(x) 
+  b <- sd(x) 
+  (x - a)/(b) 
+} 
+expedia$orig_destination_distance<-fun(expedia$orig_destination_distance)
+expedia[,7:8] <- apply(expedia[,7:8], 2, fun)
+
+inTrain <- createDataPartition(expedia$hotel_cluster, p=0.6, list=FALSE)
+#
+expediatrain <- data.frame(expedia[inTrain,])
+expediatemp <- data.frame(expedia[-inTrain,])
+inVal <- createDataPartition(expediatemp$hotel_cluster, p=0.6, list=FALSE)
+expediavalidation <- data.frame(expediatemp[inVal,])
+expediatest <- data.frame(expediatemp[-inVal,])
+
+train_input <- as.matrix(expediatrain[,-15])
+train_output <- as.vector(expediatrain[,15])
+validate_input <- as.matrix(expediavalidation[,-15])
+test_input <- as.matrix(expediatest[,-15])
+
+kmax <- 15
+ACCURACY1<- numeric(15)
+ACCURACY2<- numeric(15)
+ACCURACY3<- numeric(15)
+ER1 <- rep(0,kmax)
+ER2 <- rep(0,kmax)
+ER3 <- rep(0,kmax)
+
+for (i in 1:kmax){
+prediction <- knn(train_input, train_input,train_output, k=i)
+prediction2 <- knn(train_input, validate_input,train_output, k=i)
+prediction3 <- knn(train_input, test_input,train_output, k=i)
+
+CM1 <- table(prediction, expediatrain$hotel_cluster)
+CM2 <- table(prediction2, expediavalidation$hotel_cluster)
+CM3 <- table(prediction3, expediatest$hotel_cluster)
+
+sum0<-0
+for (n in 1:21)
+{
+  sum0<-sum0+CM1[n,n]
+  
+}
+ACCURACY1[i]<-sum0/sum(CM1)
+ER1[i]<-1-ACCURACY1[i]
+
+sum1<-0
+for (n in 1:21)
+{
+  sum1<-sum1+CM2[n,n]
+  
+}
+ACCURACY2[i]<-sum1/sum(CM2)
+ER2[i]<-1-ACCURACY2[i]
+
+sum3<-0
+for (n in 1:21)
+{
+  sum3<-sum3+CM3[n,n]
+  
+}
+ACCURACY3[i]<-sum3/sum(CM3)
+ER3[i]<-1-ACCURACY3[i]
+}
+
+plot(c(1,kmax),c(0.7,0.9),type="n", xlab="k",ylab="Error Rate")
+lines(ER1,col="blue")
+lines(ER2,col="green")
+lines(ER3,col="yellow")
+legend(9,0.2,c("Training","Validation","Test"),lty=c(1,1), col=c("blue","green","yellow"))
+
+z<-which.max(ACCURACY2)
+prediction <- knn(train_input, train_input,train_output, k=z)
+prediction2 <- knn(train_input, validate_input,train_output, k=z)
+prediction3 <- knn(train_input, test_input,train_output, k=z)
+
+CM1 <- table(prediction, expediatrain$hotel_cluster)
+CM2 <- table(prediction2, expediavalidation$hotel_cluster)
+CM3 <- table(prediction3, expediatest$hotel_cluster)
+sum2<-0
+for (i in 1:21)
+{
+  sum2<-sum2+CM3[i,i]
+}
+accuracy1<-sum2/sum(CM3)
+accuracy1
+CM3
+
+
+#subset selection
+library(leaps)
+expedia <- read.csv("/Users/apple/Desktop/course/second term/data mining/dmproject/dataset.csv")
+expedia$srch_ci <- NULL
+expedia$srch_co <- NULL
+expedia$site_name<-NULL
+
+str(expedia)
+head(expedia)
+set.seed(12345)
+train=sample(c(TRUE,FALSE), nrow(expedia),rep=TRUE)
+test=(!train)
+expedia_train <- expedia[train,]
+expedia_validation1 <- expedia[-train,]
+regfit.best=regsubsets(hotel_cluster~.,data=expedia[train,],nvmax=18)
+test.mat=model.matrix(hotel_cluster~.,data=expedia[test,])
+val.errors=rep(NA,18)
+for(i in 1:18){
+  coefi=coef(regfit.best,id=i)
+  pred=test.mat[,names(coefi)]%*%coefi
+  val.errors[i]=mean((expedia$hotel_cluster[test]-pred)^2)
+}
+val.errors
+which.min(val.errors)
+coef(regfit.best,14)
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

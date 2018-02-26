@@ -1,0 +1,166 @@
+---
+title: "Untitled"
+author: "Devika Raj"
+date: "4/22/2017"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+expedia_training_full <- read.csv("dataset.csv")
+expedia_training_full$hotel_cluster <- as.factor(expedia_training_full$hotel_cluster)
+
+expedia_training_full <- expedia_training_full[,c(-1,-5,-7,-10,-11,-14,-16)]
+
+set.seed(12345)
+trainset<- sample(nrow(expedia_training_full),0.7*nrow(expedia_training_full))
+expedia_training <- expedia_training_full[trainset,]
+expedia_test <- expedia_training_full[-trainset,]
+
+
+expedia_training <- cbind(expedia_training,expedia_training$hotel_cluster==0)
+names(expedia_training)[16] <- 'Cluster0'
+expedia_training <- cbind(expedia_training,expedia_training$hotel_cluster==1)
+names(expedia_training)[17] <- 'Cluster1'
+
+expedia_training <- cbind(expedia_training,expedia_training$hotel_cluster==2)
+names(expedia_training)[18] <- 'Cluster2'
+
+expedia_training <- cbind(expedia_training,expedia_training$hotel_cluster==3)
+names(expedia_training)[19] <- 'Cluster3'
+
+expedia_training <- cbind(expedia_training,expedia_training$hotel_cluster==4)
+names(expedia_training)[20] <- 'Cluster4'
+
+expedia_training <- cbind(expedia_training,expedia_training$hotel_cluster==5)
+names(expedia_training)[21] <- 'Cluster5'
+
+expedia_training <- cbind(expedia_training,expedia_training$hotel_cluster==6)
+names(expedia_training)[22] <- 'Cluster6'
+
+expedia_training <- cbind(expedia_training,expedia_training$hotel_cluster==7)
+names(expedia_training)[23] <- 'Cluster7'
+
+expedia_training <- cbind(expedia_training,expedia_training$hotel_cluster==8)
+names(expedia_training)[24] <- 'Cluster8'
+
+expedia_training <- cbind(expedia_training,expedia_training$hotel_cluster==9)
+names(expedia_training)[25] <- 'Cluster9'
+
+expedia_training <- cbind(expedia_training,expedia_training$hotel_cluster==10)
+names(expedia_training)[26] <- 'Cluster10'
+
+
+expedia_training <- cbind(expedia_training,expedia_training$hotel_cluster==11)
+names(expedia_training)[27] <- 'Cluster11'
+
+expedia_training <- cbind(expedia_training,expedia_training$hotel_cluster==12)
+names(expedia_training)[28] <- 'Cluster12'
+
+expedia_training <- cbind(expedia_training,expedia_training$hotel_cluster==13)
+names(expedia_training)[29] <- 'Cluster13'
+
+expedia_training <- cbind(expedia_training,expedia_training$hotel_cluster==14)
+names(expedia_training)[30] <- 'Cluster14'
+
+expedia_training <- cbind(expedia_training,expedia_training$hotel_cluster==15)
+names(expedia_training)[31] <- 'Cluster15'
+
+expedia_training <- cbind(expedia_training,expedia_training$hotel_cluster==16)
+names(expedia_training)[32] <- 'Cluster16'
+
+expedia_training <- cbind(expedia_training,expedia_training$hotel_cluster==17)
+names(expedia_training)[33] <- 'Cluster17'
+
+expedia_training <- cbind(expedia_training,expedia_training$hotel_cluster==18)
+names(expedia_training)[34] <- 'Cluster18'
+
+expedia_training <- cbind(expedia_training,expedia_training$hotel_cluster==19)
+names(expedia_training)[35] <- 'Cluster19'
+
+expedia_training <- cbind(expedia_training,expedia_training$hotel_cluster==20)
+names(expedia_training)[36] <- 'Cluster20'
+
+
+
+expedia_training$Cluster0 <- ifelse(expedia_training$Cluster0=='TRUE',1,0)
+expedia_training$Cluster1 <- ifelse(expedia_training$Cluster1=='TRUE',1,0)
+expedia_training$Cluster2 <- ifelse(expedia_training$Cluster2=='TRUE',1,0)
+expedia_training$Cluster3 <- ifelse(expedia_training$Cluster3=='TRUE',1,0)
+expedia_training$Cluster4 <- ifelse(expedia_training$Cluster4=='TRUE',1,0)
+expedia_training$Cluster5 <- ifelse(expedia_training$Cluster5=='TRUE',1,0)
+expedia_training$Cluster6 <- ifelse(expedia_training$Cluster6=='TRUE',1,0)
+expedia_training$Cluster7 <- ifelse(expedia_training$Cluster7=='TRUE',1,0)
+expedia_training$Cluster8 <- ifelse(expedia_training$Cluster8=='TRUE',1,0)
+expedia_training$Cluster9 <- ifelse(expedia_training$Cluster9=='TRUE',1,0)
+expedia_training$Cluster10 <- ifelse(expedia_training$Cluster10=='TRUE',1,0)
+expedia_training$Cluster11 <- ifelse(expedia_training$Cluster11=='TRUE',1,0)
+expedia_training$Cluster12 <- ifelse(expedia_training$Cluster12=='TRUE',1,0)
+expedia_training$Cluster13 <- ifelse(expedia_training$Cluster13=='TRUE',1,0)
+expedia_training$Cluster14 <- ifelse(expedia_training$Cluster14=='TRUE',1,0)
+expedia_training$Cluster15 <- ifelse(expedia_training$Cluster15=='TRUE',1,0)
+expedia_training$Cluster16 <- ifelse(expedia_training$Cluster16=='TRUE',1,0)
+expedia_training$Cluster17 <- ifelse(expedia_training$Cluster17=='TRUE',1,0)
+expedia_training$Cluster18 <- ifelse(expedia_training$Cluster18=='TRUE',1,0)
+expedia_training$Cluster19 <- ifelse(expedia_training$Cluster19=='TRUE',1,0)
+expedia_training$Cluster20 <- ifelse(expedia_training$Cluster20=='TRUE',1,0)
+
+
+
+
+library(nnet)
+library(NeuralNetTools)
+library(neuralnet)
+expedia_training[1:15,] <- lapply(expedia_training[1:15,],as.numeric)
+str(expedia_training)
+nn <- neuralnet(Cluster0+Cluster1+Cluster2+Cluster3+Cluster4+Cluster5+Cluster6+Cluster7+Cluster8+Cluster10+Cluster11+Cluster12+Cluster13+Cluster14+Cluster15+Cluster16+Cluster17+Cluster18+Cluster19+Cluster20~posa_continent+user_location_country+user_location_region+orig_destination_distance+is_package+channel+srch_adults_cnt+srch_children_cnt+srch_destination_id+is_booking+cnt+hotel_continent+hotel_country+hotel_market , data=expedia_training, hidden=c(1))
+plotnet(nn)
+
+# nn1 <- nnet(Cluster0+Cluster1+Cluster2+Cluster3+Cluster4+Cluster5+Cluster6+Cluster7+Cluster8+Cluster10+Cluster11+Cluster12+Cluster13+Cluster14+Cluster15+Cluster16+Cluster17+Cluster18+Cluster19+Cluster20~posa_continent+user_location_country+user_location_region+orig_destination_distance+is_package+channel+srch_adults_cnt+srch_children_cnt+srch_destination_id+is_booking+cnt+hotel_continent+hotel_country+hotel_market ,size= 3,linout=TRUE,skip=TRUE,MaNWts=10000,trace=FALSE,maxit=100,data=expedia_training)
+# 
+# library(devtools)
+# source_url('https://gist.githubusercontent.com/fawda123/7471137/raw/466c1474d0a505ff044412703516c34f1a4684a5/nnet_plot_update.r')
+# #plot each model
+# plotnet(nn)
+# prediction(nn,expedia_test)$net.result
+# 
+# expedia_test_org <-expedia_test
+# x<-expedia_test_org$hotel_cluster
+# expedia_test <- expedia_test[,-15]
+# expedia_test[1:14,] <- lapply(expedia_test[1:14,],as.numeric)
+# summary(expedia_test)
+# #predict(nn,expedia_test[3,])
+# mypredict <- compute(nn, expedia_test)$net.result
+# mypredict[1,]
+# prediction <- rep(0,21600)
+# for(i in 0:21600)
+# {
+#   prediction[i]=which.max(mypredict[3,])-1
+# }
+# prediction <- c('Cluster0', 'Cluster1', 'Cluster2','Cluster3','Cluster4','Cluster5','Cluster6','Cluster7','Cluster8','Cluster9','Cluster10','Cluster11','Cluster12','Cluster13','Cluster14','Cluster15','Cluster16','Cluster17','Cluster18','Cluster19','Cluster20')[idx]
+# table(prediction, iristest$Class)
+# 
+# nn <- neuralnet(Cluster0+Cluster1+Cluster2~srch_adults_cnt,data=expedia_training, hidden=c(1))
+# plot(nn)
+# mypredict <- compute(nn, expedia_validation[-15])$net.result
+# ?prediction
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
